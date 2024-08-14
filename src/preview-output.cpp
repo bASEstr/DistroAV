@@ -45,18 +45,18 @@ static struct preview_output context = {0};
 void on_preview_scene_changed(enum obs_frontend_event event, void *param);
 void render_preview_source(void *param, uint32_t cx, uint32_t cy);
 
-void on_output_started(void *data, calldata_t *)
+void on_preview_output_started(void *data, calldata_t *)
 {
-	obs_log(LOG_INFO, "+on_output_started()");
+	obs_log(LOG_INFO, "+on_preview_output_started()");
 	Config::Current()->PreviewOutputEnabled = true;
-	obs_log(LOG_INFO, "-on_output_started()");
+	obs_log(LOG_INFO, "-on_preview_output_started()");
 }
 
-void on_output_stopped(void *data, calldata_t *)
+void on_preview_output_stopped(void *data, calldata_t *)
 {
-	obs_log(LOG_INFO, "+on_output_stopped()");
+	obs_log(LOG_INFO, "+on_preview_output_stopped()");
 	Config::Current()->PreviewOutputEnabled = false;
-	obs_log(LOG_INFO, "-on_output_stopped()");
+	obs_log(LOG_INFO, "-on_preview_output_stopped()");
 }
 
 void preview_output_stop()
@@ -209,9 +209,9 @@ void preview_output_deinit()
 
 		// Stop handling remote start/stop events from obs-websocket
 		auto sh = obs_output_get_signal_handler(context.output);
-		signal_handler_disconnect(sh, "start", on_output_started,
-					  nullptr);
-		signal_handler_disconnect(sh, "stop", on_output_stopped,
+		signal_handler_disconnect(sh, "start",
+					  on_preview_output_started, nullptr);
+		signal_handler_disconnect(sh, "stop", on_preview_output_stopped,
 					  nullptr);
 
 		obs_output_release(context.output);
@@ -268,11 +268,12 @@ void preview_output_init()
 				// Start handling remote start/stop events from obs-websocket
 				auto sh = obs_output_get_signal_handler(
 					context.output);
-				signal_handler_connect(sh, "start",
-						       on_output_started,
-						       nullptr);
 				signal_handler_connect(
-					sh, "stop", on_output_stopped, nullptr);
+					sh, "start", on_preview_output_started,
+					nullptr);
+				signal_handler_connect(
+					sh, "stop", on_preview_output_stopped,
+					nullptr);
 
 				context.ndi_name = output_name;
 				context.ndi_groups = output_groups;

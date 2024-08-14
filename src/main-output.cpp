@@ -30,18 +30,18 @@ struct main_output {
 
 static struct main_output context = {0};
 
-void on_output_started(void *data, calldata_t *)
+void on_main_output_started(void *data, calldata_t *)
 {
-	obs_log(LOG_INFO, "+on_output_started()");
+	obs_log(LOG_INFO, "+on_main_output_started()");
 	Config::Current()->OutputEnabled = true;
-	obs_log(LOG_INFO, "-on_output_started()");
+	obs_log(LOG_INFO, "-on_main_output_started()");
 }
 
-void on_output_stopped(void *data, calldata_t *)
+void on_main_output_stopped(void *data, calldata_t *)
 {
-	obs_log(LOG_INFO, "+on_output_stopped()");
+	obs_log(LOG_INFO, "+on_main_output_stopped()");
 	Config::Current()->OutputEnabled = false;
-	obs_log(LOG_INFO, "-on_output_stopped()");
+	obs_log(LOG_INFO, "-on_main_output_stopped()");
 }
 
 void main_output_stop()
@@ -107,9 +107,9 @@ void main_output_deinit()
 
 		// Stop handling remote start/stop events from obs-websocket
 		auto sh = obs_output_get_signal_handler(context.output);
-		signal_handler_disconnect(sh, "start", on_output_started,
+		signal_handler_disconnect(sh, "start", on_main_output_started,
 					  nullptr);
-		signal_handler_disconnect(sh, "stop", on_output_stopped,
+		signal_handler_disconnect(sh, "stop", on_main_output_stopped,
 					  nullptr);
 
 		obs_output_release(context.output);
@@ -161,10 +161,11 @@ void main_output_init()
 				auto sh = obs_output_get_signal_handler(
 					context.output);
 				signal_handler_connect(sh, "start",
-						       on_output_started,
+						       on_main_output_started,
 						       nullptr);
-				signal_handler_connect(
-					sh, "stop", on_output_stopped, nullptr);
+				signal_handler_connect(sh, "stop",
+						       on_main_output_stopped,
+						       nullptr);
 
 				context.ndi_name = output_name;
 				context.ndi_groups = output_groups;
